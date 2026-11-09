@@ -12,7 +12,3 @@ The standalone `pe-inspect` program validates basic MZ and PE signatures and dis
 The same source also builds on macOS/Linux, where it can inspect PE files without running them.
 
 The utility is intentionally read-only. It is a structural inspector, not an executable loader or a guarantee that every malformed or packed file will be classified correctly.
-
-## Exercise
-
-Compare `basic-target.exe`, `dll-host.exe`, and `marker-dll.dll` with respect to entry point, sections, imports, PE characteristics and mapped image size. Rename a copy of one file to `.dat` and check that its PE headers remain unchanged.
