@@ -1,17 +1,23 @@
-# Experiment protocol
+# PoC layout and validation
 
-Each PoC is a standalone C++ source tree with its own CMake target, setup instructions and reproducible result.
+Every numbered topic contains a `code/` directory. Incomplete techniques are identified as planned and must not be presented as implemented.
 
-## Record
+## Artifact contract
 
-- Technique and exact variant
-- Windows edition/build, architecture and toolchain
-- Target executable and its SHA-256
-- Inputs, invocation and expected output
-- Observed process, thread, module and memory state
-- Limitations and failure conditions
-- Optional forensic observations
+Each completed injection/loader experiment has independently buildable source files and, where technically applicable, produces:
 
-## Reproducibility
+```text
+build/bin/<id>-<technique>/target.exe
+build/bin/<id>-<technique>/injector.exe
+build/bin/<id>-<technique>/payload.dll
+```
 
-Run experiments only against owned sample processes in an isolated VM. Record a baseline before the experiment, run one experiment at a time, collect evidence, and reset to a known state. Do not classify a PoC as implemented merely because its research directory exists.
+The exact activation mechanism, supported target and technical limitations must be documented. In particular, a cooperative target-triggered DLL load must not be described as remote process injection.
+
+Read-only PE inspection and process-memory enumeration are foundational utilities rather than injection techniques. They are not required to produce artificial injector or payload files.
+
+## Validation record
+
+Each implemented PoC should identify the Windows version, compiler, target PID, executable architecture, input conditions, expected result and observed result.
+
+Use owned sample processes. Keep the ground truth separate from optional forensic interpretations. Distinguish cross-compilation, native execution, and successful payload invocation.

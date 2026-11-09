@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(windows_injection_pocs VERSION 0.2.0 LANGUAGES CXX)
+project(windows_injection_pocs VERSION 0.3.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,7 +14,7 @@ foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
 endforeach()
 
 enable_testing()
-add_subdirectory(tools/pe-inspect)
+add_subdirectory(techniques/00-pe-format)
 
 add_test(NAME pe-inspect-rejects-text COMMAND pe-inspect "${CMAKE_SOURCE_DIR}/README.md")
 set_tests_properties(pe-inspect-rejects-text PROPERTIES WILL_FAIL TRUE)
@@ -38,6 +38,11 @@ if(WIN32)
     add_test(NAME memory-layout-smoke COMMAND memory-layout)
     add_test(NAME dll-loading-smoke COMMAND dll-load-demo $<TARGET_FILE:marker-dll>)
     add_test(NAME dll-host-smoke COMMAND dll-host $<TARGET_FILE:marker-dll> --hold-ms 50)
+    add_test(NAME poc01-cooperative-load
+        COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass
+            -File "${CMAKE_SOURCE_DIR}/tests/poc01.ps1"
+            $<TARGET_FILE:poc01-target>
+            $<TARGET_FILE:poc01-injector>)
 else()
     message(STATUS "Windows-specific sample targets are disabled on this host")
 endif()

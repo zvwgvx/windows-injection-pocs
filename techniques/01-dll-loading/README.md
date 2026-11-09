@@ -1,33 +1,34 @@
-# 01 — Normal DLL loading
+# 01 — Cooperative DLL loading baseline
 
-**Status:** Implemented as a standalone, opt-in loading experiment.
+**Status:** Implemented. This is a cooperative loading baseline, not remote process injection.
 
-## Components
+## Build outputs
 
-- `dll-load-demo.exe`: a separate C++ program using Windows' normal DLL loader.
-- `marker-dll.dll`: a harmless DLL exporting `LabMarker` and `LabIncrement`.
-- `dll-host.exe`: a target that can hold the same DLL in memory for inspection.
-
-## Windows x64
-
-```powershell
-cmake -S . -B build -A x64
-cmake --build build --config Release
-.\build\bin\dll-load-demo.exe "$PWD\build\bin\marker-dll.dll"
-.\build\bin\dll-host.exe "$PWD\build\bin\marker-dll.dll" --hold-ms 15000
+```text
+build/bin/01-dll-loading/
+├── target.exe
+├── injector.exe
+└── payload.dll
 ```
 
-The output directory may differ with the CMake generator. Each executable validates both exported functions and prints its own PID, the loaded module base and a marker result.
+All three programs have independent C++ source files under [code](code/). The executable named `injector.exe` is an experiment controller: it signals a named Windows event created by the dedicated sample target. The target then loads the fixed `payload.dll` located in its own output directory and invokes two exported marker functions. It does not allocate or write memory in unrelated processes.
 
-The DLL is deliberately loaded by the host itself. This experiment demonstrates normal image loading and should not be labeled remote DLL injection.
+## Run
 
-## Expected observations
+Build with CMake on Windows x64, then start:
 
-- A DLL image mapped into the calling process
-- An exported marker that returns deterministic data
-- Module state visible while the target holds it open
-- An orderly `FreeLibrary` on completion
+```powershell
+.\build\bin\01-dll-loading\target.exe --duration-sec 30
+```
 
-## Limitations
+The target prints its PID. In a second terminal:
 
-Loading failure, invalid DLL architecture, missing exports and insufficient privileges can change the outcome. A successful DLL load is not evidence of malicious behavior.
+```powershell
+.\build\bin\01-dll-loading\injector.exe <target-pid>
+```
+
+The first terminal should print `event_received=true`, `payload_marker=POC01_PAYLOAD_INSIDE_TARGET` and `payload_unloaded=true`.
+
+The marker DLL is loaded by the target using `LoadLibraryExW`. No arbitrary PE loader, memory injection, or evasion behavior is implemented.
+
+A separate baseline `dll-load-demo` also demonstrates direct in-process DLL loading with the common `marker-dll` sample.

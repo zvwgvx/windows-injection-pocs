@@ -1,36 +1,58 @@
 # Windows Injection PoCs
 
-A personal collection of independent C++ proof-of-concept experiments exploring Windows PE internals, DLL loading, virtual memory, and process-injection research.
+A personal C++20 collection exploring Windows PE internals, loading behavior, process memory, and process-injection research through independent proof-of-concept programs.
 
 **Author:** [zvwgvx](https://github.com/zvwgvx)
-**Language:** C++20
 **Primary platform:** Windows x64
-**Repository type:** Standalone PoCs, not a single unified injector.
+**Repository type:** Standalone PoCs, not a unified injection framework.
 
-## Implemented experiments
+## Structure and build contract
 
-| Number | Topic | Programs | Status |
-| --- | --- | --- | --- |
-| 00 | PE format | `pe-inspect` | Implemented |
-| 01 | DLL loading baseline | `dll-load-demo`, `marker-dll`, `dll-host` | Implemented |
-| 02 | Process memory | `memory-layout`, `memory-regions`, `multithreaded-target` | Implemented |
-| 03 | PE injection | — | Planned |
-| 04 | Manual mapping | — | Planned |
-| 05 | Reflective loading | — | Planned |
-| 06 | Section mapping | — | Planned |
-| 07 | APC-based execution | — | Planned |
-| 08 | Thread execution hijacking | — | Planned |
-| 09 | Process hollowing | — | Planned |
-| 10 | Module stomping | — | Planned |
-| 11 | Process doppelgänging | — | Planned |
-| 12 | Process herpaderping | — | Planned |
-| 13 | Process ghosting | — | Planned |
+Each numbered topic has a `code/` directory. An **implemented loading/injection experiment** is expected to have three independently built artifacts:
 
-The catalogue covers related techniques, not exclusively MITRE ATT&CK T1055.002.
+```text
+techniques/<id>-<topic>/
+├── CMakeLists.txt
+├── README.md
+└── code/
+    ├── target.cpp
+    ├── injector.cpp
+    └── payload.cpp
 
-## Build on Windows
+build/bin/<id>-<topic>/
+├── target.exe
+├── injector.exe
+└── payload.dll
+```
 
-Install CMake 3.20+ and Visual Studio C++ build tools.
+`injector.exe` is a naming convention for the experiment's control program. Its actual behavior is documented for each topic. It must not be assumed to perform remote injection merely because of its filename. Foundation topics and incomplete entries are explicitly exempt from the three-artifact contract.
+
+## Current status
+
+| ID | Topic | Result |
+| --- | --- | --- |
+| 00 | PE format | Read-only `pe-inspect` executable; cross-platform |
+| 01 | DLL loading baseline | Built `target.exe`, `injector.exe`, `payload.dll` |
+| 02 | Process memory | `memory-layout`, `memory-regions` utilities |
+| 03 | PE injection | Planned |
+| 04 | Manual mapping | Planned |
+| 05 | Reflective loading | Planned |
+| 06 | Section mapping | Planned |
+| 07 | APC-based execution | Planned |
+| 08 | Thread execution hijacking | Planned |
+| 09 | Process hollowing | Planned |
+| 10 | Module stomping | Planned |
+| 11 | Process doppelgänging | Planned |
+| 12 | Process herpaderping | Planned |
+| 13 | Process ghosting | Planned |
+
+The catalogue contains several related process and image execution techniques; not every item is strictly MITRE ATT&CK T1055.002.
+
+The current `01` implementation is a **cooperative, opt-in DLL loading PoC**. The controller only signals the dedicated owned target, and the target loads the bundled DLL itself. This is not remote DLL injection, manual mapping, or screenshare evasion.
+
+## Build
+
+Windows: CMake 3.20+ and Visual Studio C++ build tools.
 
 ```powershell
 cmake -S . -B build -A x64
@@ -38,69 +60,44 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-Executables and the sample DLL are placed in `build/bin` for supported generators.
-
-## Run the first experiments
-
-```powershell
-.\build\bin\basic-target.exe --duration-sec 20
-.\build\bin\pe-inspect.exe .\build\bin\basic-target.exe
-.\build\bin\dll-load-demo.exe .\build\bin\marker-dll.dll
-.\build\bin\dll-host.exe .\build\bin\marker-dll.dll --hold-ms 10000
-.\build\bin\memory-layout.exe
-.\build\bin\multithreaded-target.exe --duration-sec 20
-.\build\bin\memory-regions.exe 4321
-```
-
-Use the actual PID printed by `basic-target` or `multithreaded-target` for `memory-regions`.
-
-## Portable PE inspector
-
-`pe-inspect` also builds on macOS and Linux, where it can inspect a PE file without executing it.
+macOS or Linux can build the read-only PE inspector:
 
 ```bash
 cmake -S . -B build
 cmake --build build
 ctest --test-dir build --output-on-failure
-./build/bin/pe-inspect /path/to/windows.exe
 ```
 
-## Targets
+## Run PoC 01
 
-- **BasicTarget:** heartbeat, stable marker string, PID/TID, configurable runtime.
-- **MultithreadedTarget:** three worker threads, independent private RW allocations and marker strings.
-- **DllHost:** opt-in loading of the provided DLL, with a configurable inspection window.
-- **Marker DLL:** two harmless exports, `LabMarker` and `LabIncrement`.
+First terminal:
 
-## Layout
+```powershell
+.\build\bin\01-dll-loading\target.exe --duration-sec 30
+```
+
+Read the PID printed by the target. Second terminal:
+
+```powershell
+.\build\bin\01-dll-loading\injector.exe <target-pid>
+```
+
+The target should report `payload_marker=POC01_PAYLOAD_INSIDE_TARGET` followed by `payload_unloaded=true`.
+
+The payload is the local file `build/bin/01-dll-loading/payload.dll`, compiled from `techniques/01-dll-loading/code/payload.cpp`.
+
+## Other programs
 
 ```text
-windows-injection-pocs/
-├── targets/
-│   ├── basic-target/
-│   ├── multithreaded-target/
-│   └── dll-host/
-├── samples/
-│   └── marker-dll/
-├── tools/
-│   └── pe-inspect/
-├── techniques/
-│   ├── 00-pe-format/
-│   ├── 01-dll-loading/
-│   ├── 02-process-memory/
-│   └── 03-pe-injection/ ... 13-process-ghosting/
-├── forensics/
-├── docs/
-└── .github/workflows/
+targets/basic-target
+targets/multithreaded-target
+targets/dll-host
+samples/marker-dll
+techniques/00-pe-format/code
+techniques/02-process-memory/code
 ```
 
-Each numbered technique is documented independently. A directory marked planned is not an implemented injector.
-
-## Experiment standards
-
-Every completed experiment should include source, an independent build target, prerequisites, observed results, reproducibility notes, and limitations. See [experiment protocol](docs/experiment-protocol.md).
-
-Experiments are designed for authorized local research using owned sample processes. The current programs do not inject into another process or provide evasion functionality. Forensics notes are optional supporting material.
+See the README inside each technique for its supported commands, technical scope and limitations. Every implemented PoC must have self-contained source and a reproducible result. The optional `forensics/` directory holds observations and detection notes.
 
 ## License
 

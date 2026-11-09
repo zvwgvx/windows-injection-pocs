@@ -6,12 +6,12 @@
 - Windows cross-compiler: x86_64-w64-mingw32-g++ 15.2.0
 - Build system: CMake 4.3.0
 
-The native macOS `pe-inspect` build and its rejection test passed. All Windows targets, sample DLLs and technique programs cross-compiled successfully as PE32+ binaries.
+The native macOS `pe-inspect` build and rejection test passed. All existing Windows targets, sample DLLs, and foundation utilities cross-compiled successfully as PE32+ binaries.
 
-The native macOS PE inspector correctly reported sections and imports for the cross-compiled `basic-target.exe` and `marker-dll.dll`. It reported machine `0x8664` and expected PE32+ metadata.
+The `01-dll-loading` cooperative experiment also cross-compiled to three standalone Windows x64 files: `target.exe`, `injector.exe`, and `payload.dll`.
 
 ## Windows runtime
 
-Windows runtime execution is not yet locally verified. A GitHub Actions matrix runs the sample process and DLL loading smoke tests on Windows CI.
+Windows runtime tests are configured through GitHub Actions. The `poc01-cooperative-load` test starts the dedicated target, signals it through the companion controller, and checks for the marker exported by `payload.dll`.
 
-This document distinguishes a successful cross-compile from successful execution on Windows.
+A successful compile is not proof of successful runtime injection; the `01` experiment is normal target-initiated DLL loading after an explicit signal.

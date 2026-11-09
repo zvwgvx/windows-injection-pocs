@@ -1,4 +1,4 @@
-add_executable(pe-inspect main.cpp)
+add_executable(pe-inspect code/main.cpp)
 
 if(MSVC)
     target_compile_options(pe-inspect PRIVATE /W4 /permissive-)
