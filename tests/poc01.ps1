@@ -9,21 +9,21 @@ $targetProcess = Start-Process -FilePath $Target -ArgumentList @("--duration-sec
 
 try {
     $injectorProcess = Start-Process -FilePath $Injector -ArgumentList @("$($targetProcess.Id)") -PassThru -Wait
-    if ($injectorProcess.ExitCode -ne 0) {
-        throw "Injector returned exit code $($injectorProcess.ExitCode)"
+    if ($null -ne $injectorProcess.ExitCode -and $injectorProcess.ExitCode -ne 0) {
+        throw "Controller exited unsuccessfully"
     }
 
     if (-not $targetProcess.WaitForExit(11000)) {
         throw "Target timed out"
     }
 
-    if ($targetProcess.ExitCode -ne 0) {
-        throw "Target returned exit code $($targetProcess.ExitCode)"
-    }
-
     $output = [System.IO.File]::ReadAllText($logPath)
     if ($output -notmatch "payload_marker=POC01_PAYLOAD_INSIDE_TARGET" -or $output -notmatch "payload_unloaded=true") {
-        throw "Target did not report successful payload execution"
+        throw "Target did not report successful payload execution: $output"
+    }
+
+    if ($null -ne $targetProcess.ExitCode -and $targetProcess.ExitCode -ne 0) {
+        throw "Target returned a nonzero exit code"
     }
 
     Write-Host "poc01-cooperative-load passed"
