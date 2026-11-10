@@ -1,23 +1,17 @@
-# PoC layout and validation
+# Research implementation requirements
 
-Every numbered topic contains a `code/` directory. Incomplete techniques are identified as planned and must not be presented as implemented.
+Each technique has a dedicated source directory. The technique status must accurately reflect whether executable code has been implemented and tested.
 
-## Artifact contract
+## Independent targets
 
-Each completed injection/loader experiment has independently buildable source files and, where technically applicable, produces:
+Targets do not expose a prearranged loading command, named event, RPC endpoint, signal channel, or other cooperation mechanism to receive a payload. A baseline demonstrating voluntary DLL loading is a support tool, not an injector PoC.
 
-```text
-build/bin/<id>-<technique>/target.exe
-build/bin/<id>-<technique>/injector.exe
-build/bin/<id>-<technique>/payload.dll
-```
+## Evidence of implementation
 
-The exact activation mechanism, supported target and technical limitations must be documented. In particular, a cooperative target-triggered DLL load must not be described as remote process injection.
+Document the precise mechanism, build output, execution requirements, observable effect and limitations. Distinguish code that runs in a target process, code voluntarily loaded by that process, and true cross-process execution.
 
-Read-only PE inspection and process-memory enumeration are foundational utilities rather than injection techniques. They are not required to produce artificial injector or payload files.
+Neither a file named `injector.exe` nor a returned marker proves process injection. Planned experiments must not be presented as operational.
 
-## Validation record
+## Validation
 
-Each implemented PoC should identify the Windows version, compiler, target PID, executable architecture, input conditions, expected result and observed result.
-
-Use owned sample processes. Keep the ground truth separate from optional forensic interpretations. Distinguish cross-compilation, native execution, and successful payload invocation.
+Record Windows build, architecture, compiler, test target, input and outcome. Separate successful compilation from successful execution. Use owned sample processes.

@@ -1,17 +1,9 @@
 # Build and validation
 
-## Local cross-compilation
+The PE inspector and Windows memory utilities have been built using CMake. The Windows targets and DLL loading support tools cross-compile with MinGW-w64.
 
-- Host: macOS, AppleClang 17
-- Windows cross-compiler: x86_64-w64-mingw32-g++ 15.2.0
-- Build system: CMake 4.3.0
+The `targets/basic-target` and `targets/multithreaded-target` projects do not expose any channel for a payload controller. Normal in-process DLL loading tools live under `tools/`.
 
-The native macOS `pe-inspect` build and rejection test passed. All existing Windows targets, sample DLLs, and foundation utilities cross-compiled successfully as PE32+ binaries.
+The old cooperative DLL loading CI test and controller have been removed; they did not implement cross-process injection. Other smoke tests validate the supporting programs.
 
-The `01-dll-loading` cooperative experiment also cross-compiled to three standalone Windows x64 files: `target.exe`, `injector.exe`, and `payload.dll`.
-
-## Windows runtime
-
-Windows runtime tests are configured through GitHub Actions. The `poc01-cooperative-load` test starts the dedicated target, signals it through the companion controller, and checks for the marker exported by `payload.dll`.
-
-A successful compile is not proof of successful runtime injection; the `01` experiment is normal target-initiated DLL loading after an explicit signal.
+Windows CI tests are authoritative for Windows runtime behavior. Do not describe a Windows cross-compile as proof of successful runtime injection.
