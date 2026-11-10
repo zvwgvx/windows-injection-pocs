@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(windows_injection_pocs VERSION 0.4.0 LANGUAGES CXX)
+project(windows_injection_pocs VERSION 0.4.1 LANGUAGES CXX)
+
+if(NOT WIN32)
+    message(FATAL_ERROR "This project supports Windows only.")
+endif()
+
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "This project requires Windows x64.")
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -14,30 +22,24 @@ foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
 endforeach()
 
 enable_testing()
+find_package(Threads REQUIRED)
+
 add_subdirectory(tools/pe-inspect)
+add_subdirectory(targets/basic-target)
+add_subdirectory(targets/multithreaded-target)
+add_subdirectory(tools/dll-host)
+add_subdirectory(tools/dll-load-demo)
+add_subdirectory(samples/marker-dll)
+add_subdirectory(techniques/02-process-memory)
+
+target_link_libraries(multithreaded-target PRIVATE Threads::Threads)
 
 add_test(NAME pe-inspect-rejects-text COMMAND pe-inspect "${CMAKE_SOURCE_DIR}/README.md")
 set_tests_properties(pe-inspect-rejects-text PROPERTIES WILL_FAIL TRUE)
-
-if(WIN32)
-    find_package(Threads REQUIRED)
-
-    add_subdirectory(targets/basic-target)
-    add_subdirectory(targets/multithreaded-target)
-    add_subdirectory(tools/dll-host)
-    add_subdirectory(tools/dll-load-demo)
-    add_subdirectory(samples/marker-dll)
-    add_subdirectory(techniques/02-process-memory)
-
-    target_link_libraries(multithreaded-target PRIVATE Threads::Threads)
-
-    add_test(NAME pe-inspect-valid-exe COMMAND pe-inspect $<TARGET_FILE:basic-target>)
-    add_test(NAME pe-inspect-valid-dll COMMAND pe-inspect $<TARGET_FILE:marker-dll>)
-    add_test(NAME basic-target-smoke COMMAND basic-target --interval-ms 100 --duration-sec 1)
-    add_test(NAME multithreaded-target-smoke COMMAND multithreaded-target --duration-sec 1)
-    add_test(NAME memory-layout-smoke COMMAND memory-layout)
-    add_test(NAME dll-loading-smoke COMMAND dll-load-demo $<TARGET_FILE:marker-dll>)
-    add_test(NAME dll-host-smoke COMMAND dll-host $<TARGET_FILE:marker-dll> --hold-ms 50)
-else()
-    message(STATUS "Windows-specific sample targets are disabled on this host")
-endif()
+add_test(NAME pe-inspect-valid-exe COMMAND pe-inspect $<TARGET_FILE:basic-target>)
+add_test(NAME pe-inspect-valid-dll COMMAND pe-inspect $<TARGET_FILE:marker-dll>)
+add_test(NAME basic-target-smoke COMMAND basic-target --interval-ms 100 --duration-sec 1)
+add_test(NAME multithreaded-target-smoke COMMAND multithreaded-target --duration-sec 1)
+add_test(NAME memory-layout-smoke COMMAND memory-layout)
+add_test(NAME dll-loading-smoke COMMAND dll-load-demo $<TARGET_FILE:marker-dll>)
+add_test(NAME dll-host-smoke COMMAND dll-host $<TARGET_FILE:marker-dll> --hold-ms 50)

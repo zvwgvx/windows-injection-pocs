@@ -3,7 +3,7 @@
 A personal C++20 research repository studying Windows PE internals, process memory, and process injection.
 
 **Author:** [zvwgvx](https://github.com/zvwgvx)
-**Primary platform:** Windows x64
+**Platform:** Windows x64 only
 
 ## Architecture
 
@@ -79,11 +79,10 @@ ctest --test-dir build -C Release --output-on-failure
 .\build\bin\dll-load-demo.exe .\build\bin\marker-dll.dll
 ```
 
-The PE inspector also builds on macOS and Linux, where it can examine Windows PE files without running them.
 
 ## Validation
 
-GitHub Actions builds and runs smoke tests for Windows and macOS. Cross-compiling to Windows is distinct from runtime verification. Forensics notes are supplementary to Windows Internals research.
+GitHub Actions builds and runs smoke tests on Windows x64 only. Passing these tests does not demonstrate remote injection. Forensics notes are supplementary to Windows Internals research.
 
 ## License
 

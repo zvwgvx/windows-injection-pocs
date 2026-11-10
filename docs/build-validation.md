@@ -1,9 +1,19 @@
-# Build and validation
+# Windows build and validation
 
-The PE inspector and Windows memory utilities have been built using CMake. The Windows targets and DLL loading support tools cross-compile with MinGW-w64.
+The project targets Windows x64 exclusively. GitHub Actions uses a Windows runner, Visual C++ build tools and CMake.
 
-The `targets/basic-target` and `targets/multithreaded-target` projects do not expose any channel for a payload controller. Normal in-process DLL loading tools live under `tools/`.
+```powershell
+cmake -S . -B build -A x64
+cmake --build build --config Release
+ctest --test-dir build -C Release --output-on-failure
+```
 
-The old cooperative DLL loading CI test and controller have been removed; they did not implement cross-process injection. Other smoke tests validate the supporting programs.
+Passing build and smoke tests establishes that the current targets, PE inspection tools and process-memory utilities work under the tested Windows environment. It does not establish that any remote injection technique has been implemented.
 
-Windows CI tests are authoritative for Windows runtime behavior. Do not describe a Windows cross-compile as proof of successful runtime injection.
+## Independence contract
+
+The `targets/basic-target` and `targets/multithreaded-target` programs have no payload-loading command channel, controller-specific named event, or callback that cooperates with an injector.
+
+The normal DLL loading tools under `tools/` explicitly load DLLs themselves; they are not injection PoCs.
+
+All unimplemented injection techniques remain labelled as planned. No injection claim is inferred from a directory name, successful compilation or a marker emitted by a cooperative target.

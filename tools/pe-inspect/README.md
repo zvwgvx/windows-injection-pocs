@@ -9,4 +9,4 @@
 .\build\bin\pe-inspect.exe .\build\bin\marker-dll.dll
 ```
 
-The inspector also builds on macOS/Linux and can inspect Windows PE files offline. It is a supporting tool, not an injection technique, and does not produce an injector/payload pair.
+It is a Windows supporting tool, not an injection technique, and does not produce an injector/payload pair.
