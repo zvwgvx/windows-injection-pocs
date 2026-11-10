@@ -14,7 +14,7 @@ foreach(config DEBUG RELEASE RELWITHDEBINFO MINSIZEREL)
 endforeach()
 
 enable_testing()
-add_subdirectory(techniques/00-pe-format)
+add_subdirectory(tools/pe-inspect)
 
 add_test(NAME pe-inspect-rejects-text COMMAND pe-inspect "${CMAKE_SOURCE_DIR}/README.md")
 set_tests_properties(pe-inspect-rejects-text PROPERTIES WILL_FAIL TRUE)

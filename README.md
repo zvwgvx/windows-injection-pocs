@@ -31,7 +31,6 @@ build/bin/<id>-<topic>/
 
 | ID | Topic | Result |
 | --- | --- | --- |
-| 00 | PE format | Read-only `pe-inspect` executable; cross-platform |
 | 01 | DLL loading baseline | Built `target.exe`, `injector.exe`, `payload.dll` |
 | 02 | Process memory | `memory-layout`, `memory-regions` utilities |
 | 03 | PE injection | Planned |
@@ -93,7 +92,7 @@ targets/basic-target
 targets/multithreaded-target
 targets/dll-host
 samples/marker-dll
-techniques/00-pe-format/code
+tools/pe-inspect/code
 techniques/02-process-memory/code
 ```
 
