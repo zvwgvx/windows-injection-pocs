@@ -25,6 +25,7 @@ enable_testing()
 find_package(Threads REQUIRED)
 
 add_subdirectory(tools/pe-inspect)
+add_subdirectory(tools/process-observer)
 add_subdirectory(targets/basic-target)
 add_subdirectory(targets/multithreaded-target)
 add_subdirectory(tools/dll-host)
@@ -33,6 +34,8 @@ add_subdirectory(samples/marker-dll)
 add_subdirectory(techniques/02-process-memory)
 
 target_link_libraries(multithreaded-target PRIVATE Threads::Threads)
+
+add_test(NAME process-observer-self COMMAND process-observer --self --samples 1)
 
 add_test(NAME pe-inspect-rejects-text COMMAND pe-inspect "${CMAKE_SOURCE_DIR}/README.md")
 set_tests_properties(pe-inspect-rejects-text PROPERTIES WILL_FAIL TRUE)

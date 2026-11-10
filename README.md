@@ -1,13 +1,15 @@
 # Windows Injection PoCs
 
-A personal C++20 research repository studying Windows PE internals, process memory, and process injection.
+A personal C++20 research repository studying Windows PE internals, process memory, and process-injection mechanisms.
 
 **Author:** [zvwgvx](https://github.com/zvwgvx)
 **Platform:** Windows x64 only
 
 ## Architecture
 
-Targets are ordinary, independent processes. They do not contain named events, command channels, shared loading hooks, or logic to accept DLL payloads from another program.
+Targets are ordinary Windows processes. They do not provide special DLL-loading endpoints, prearranged injector events, or code-execution hooks.
+
+Cooperation in experiments is limited to **ground-truth collection and comparison**: the target may expose its PID and diagnostic output, while an independent read-only observer measures module, thread, and memory-region metadata. This cooperation does not cause payload execution.
 
 ```text
 windows-injection-pocs/
@@ -20,6 +22,7 @@ windows-injection-pocs/
 │   └── ...
 ├── tools/
 │   ├── pe-inspect/
+│   ├── process-observer/
 │   ├── dll-load-demo/
 │   └── dll-host/
 ├── samples/
@@ -45,24 +48,25 @@ windows-injection-pocs/
 | 12 | Process herpaderping | Planned |
 | 13 | Process ghosting | Planned |
 
-A directory is not evidence of a working injector. No technique should claim injection unless a separate process actually initiates the loading without cooperation from the target. The repository currently contains independent test targets, memory utilities, and PE/DLL inspection tools, but no operational remote injector.
+A directory, a file called `injector.exe`, or a marker printed by the target is not proof of remote injection. The repository does not yet include an operational cross-process injector.
 
-## Target programs
+## Independent target programs
 
-`basic-target.exe` is a standalone heartbeat process with a marker, PID, TID and configurable lifetime. `multithreaded-target.exe` uses three independent worker threads and allocations. Neither target accepts external DLLs, implements a remote-control protocol, nor invokes `LoadLibrary` in response to another process.
+`basic-target.exe` is a heartbeat process with a marker, PID, TID and configurable lifetime. `multithreaded-target.exe` has three worker threads and local memory allocations. Neither program accepts external DLLs or implements a controller protocol.
 
 ## Supporting tools
 
-The normal DLL loading demo is deliberately located under `tools/`, not `techniques/`. It demonstrates how a process loads a DLL voluntarily and is not process injection.
-
 | Tool | Purpose |
 | --- | --- |
-| `pe-inspect` | Read-only PE header, section, and import analysis |
-| `dll-load-demo` | Normal in-process DLL loading baseline |
-| `dll-host` | Explicit host for the benign marker DLL |
-| `marker-dll` | DLL with two harmless exported functions |
+| `pe-inspect` | Read-only PE headers, sections and imports |
+| `process-observer` | Independent process metadata, module list, thread list and memory summaries |
+| `dll-load-demo` | Voluntary in-process DLL-loading baseline |
+| `dll-host` | Explicit host for the harmless marker DLL |
+| `marker-dll` | DLL exporting two marker functions |
 
-## Build on Windows
+The normal DLL loading demos are support tools, not injection PoCs.
+
+## Build and test on Windows
 
 Install CMake 3.20+ and Visual Studio C++ build tools.
 
@@ -72,17 +76,25 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
+The repository contains **no GitHub Actions CI**. Run all build and runtime checks directly on Windows.
+
+## Observation baseline
+
+Start the target in one terminal:
+
 ```powershell
 .\build\bin\basic-target.exe --duration-sec 30
-.\build\bin\multithreaded-target.exe --duration-sec 30
-.\build\bin\pe-inspect.exe .\build\bin\basic-target.exe
-.\build\bin\dll-load-demo.exe .\build\bin\marker-dll.dll
 ```
 
+Read the PID from the target's output. Use a separate terminal to observe it:
 
-## Validation
+```powershell
+.\build\bin\process-observer.exe --pid 1234 --samples 5 --interval-ms 1000
+```
 
-GitHub Actions builds and runs smoke tests on Windows x64 only. Passing these tests does not demonstrate remote injection. Forensics notes are supplementary to Windows Internals research.
+Replace `1234` with the printed PID. This is metadata observation only: no process manipulation or payload execution is performed.
+
+See [validation protocol](docs/experiment-protocol.md) for evidence requirements and limitations.
 
 ## License
 
