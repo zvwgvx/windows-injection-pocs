@@ -6,12 +6,29 @@ This experiment uses the classic remote `LoadLibraryW` sequence. It does not use
 named event, pipe, RPC endpoint, window message, hook, target export, command-line
 switch, or environment variable to make the target load the payload.
 
-## Validation status
+## Evidence
 
-Runtime evidence was recorded on Windows x64 on 2026-11-11: the full
-absence → inject → presence → duplicate-refusal chain passed on the real target, with
-the payload log verified from inside the target. See
+Runtime evidence was recorded on Windows 10 Pro 22H2 (build 19045.6456, x64) on
+2026-11-11. The full absence → inject → presence → duplicate-refusal chain passed on
+the unmodified target, and the payload log was verified from inside the target. The
+complete record, raw output, and artifact hashes are in
 [docs/runs/2026-11-11-technique-01.md](../../docs/runs/2026-11-11-technique-01.md).
+
+| Run | Target | Payload | Result |
+| --- | --- | --- | --- |
+| self-test | PID 1884 | `poc01-payload.dll` | `result=pass` (exits 3 → 0 → 0 → 6, target alive) |
+| manual | PID 856 | `poc01-payload.dll` | `result=success`, all log checks true |
+| manual | PID 3432 | `poc01-payload-heartbeat.dll` | `result=success`; live heartbeat for ~35.8 s uptime |
+| foreign | PID 12340 | `BURNING_HANDSHAW.dll` (47.9 MB, Desktop) | module present at `0x7ff88b2b0000`; exit 4 by design (capture truncated at `module_path_match=true`) |
+
+Third-party confirmation with System Informer — the injected module appears in the
+target's module list at exactly the base address the injector reported:
+
+![System Informer listing basic-target.exe (PID 12340) with BURNING_HANDSHAW.dll at 0x7ff88b2b0000](../../docs/runs/assets/2026-11-11-technique-01-system-informer.png)
+
+`target_pid=12340` and `module_base=0x7ff88b2b0000` match the System Informer view byte
+for byte, and `thread_exit_code=0x8b2b0000` equals the low 32 bits of that base. The
+live heartbeat capture is in the same run record.
 
 ## Components
 
@@ -66,34 +83,71 @@ itself is not treated as sufficient proof.
 
 ## Usage
 
-Build on Windows x64, then start an independent target:
+### Run bundle
+
+The staged bundle in [`tools/bin/`](../../tools/bin/) contains five statically linked
+binaries (`basic-target.exe`, `poc01-injector.exe`, `poc01-payload.dll`,
+`poc01-payload-heartbeat.dll`, `poc01-selftest.exe`). Copy it to a Windows x64 machine
+or run it directly over an RDP-mapped share such as
+`\\tsclient\windows-injection-pocs\tools\bin\`.
+
+To build and stage it yourself on Windows:
 
 ```powershell
-.\tools\bin\basic-target.exe --duration-sec 60
+cmake -S . -B build -A x64
+cmake --build build --config Release      # the stage-poc01 target fills tools/bin/
 ```
 
-Read the PID printed by the target. Confirm that the payload is absent:
+Cross-compiling from macOS or Linux with MinGW-w64 also works (compile-only
+validation):
+
+```bash
+cmake -S . -B build-mingw -DCMAKE_SYSTEM_NAME=Windows \
+  -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++
+cmake --build build-mingw -j 8
+```
+
+### Self-test (one command)
 
 ```powershell
-.\tools\bin\poc01-injector.exe --pid 1234 --dll .\tools\bin\poc01-payload.dll --check-only
-# exit code 3 = absent
+cd \\tsclient\windows-injection-pocs\tools\bin
+.\poc01-selftest.exe --target .\basic-target.exe --injector .\poc01-injector.exe --payload .\poc01-payload.dll
 ```
 
-Inject and verify:
+Expected phases: `precondition` (exit 3), `inject` (exit 0), `postcondition`
+(exit 0), `duplicate` (exit 6), `target_health` (alive), then `result=pass`.
+
+### Manual injection
+
+Start a fresh target in one window; it prints its PID:
 
 ```powershell
-.\tools\bin\poc01-injector.exe --pid 1234 --dll .\tools\bin\poc01-payload.dll
+.\basic-target.exe --duration-sec 120
+# BasicTarget pid=<PID> ...
 ```
 
-Expected key output:
+In another window, in the same directory:
+
+```powershell
+# negative control: must report absent (exit 3)
+.\poc01-injector.exe --pid <PID> --dll .\poc01-payload.dll --check-only
+
+# inject
+.\poc01-injector.exe --pid <PID> --dll .\poc01-payload.dll
+
+# payload-side evidence, written from inside the target
+Get-Content "$env:TEMP\wininj-poc01\poc01-payload-<PID>.log"
+```
+
+Expected injector output ends with:
 
 ```text
 module_before=absent
-provider_module=kernelbase.dll
+provider_module=KERNEL32.DLL
 remote_thread_id=....
 module_after=present
 module_path_match=true
-payload_log=...\wininj-poc01\poc01-payload-1234.log
+payload_log=...\wininj-poc01\poc01-payload-<PID>.log
 payload_log_fresh=true
 payload_log_pid_match=true
 payload_log_base_match=true
@@ -102,6 +156,40 @@ result=success
 
 The payload remains loaded until the target exits. The injector does not call
 `FreeLibrary` in the target.
+
+### Heartbeat payload variant
+
+Use a **fresh** target for the second variant:
+
+```powershell
+.\basic-target.exe --duration-sec 120          # new PID
+.\poc01-injector.exe --pid <PID> --dll .\poc01-payload-heartbeat.dll
+Get-Content "$env:TEMP\wininj-poc01\poc01-payload-<PID>.log" -Wait
+```
+
+The log gets one `event=dll_attach` line, then an `event=heartbeat` line about every
+500 ms with an increasing `uptime_ms` and a UTC `timestamp` — live proof that the
+payload keeps executing inside the target. The heartbeat thread stops by itself as soon
+as the DLL is unloaded.
+
+### Expected refusals and controls
+
+| Command | Exit | Meaning |
+| --- | --- | --- |
+| `--check-only` before injection | 3 | payload absent |
+| `--check-only` after injection | 0 | payload present at the exact path |
+| second injection of the same DLL into the same target | 6 | duplicate guard; no injection attempted |
+| injection of a foreign DLL that writes no evidence log | 4 | injection occurred, evidence chain incomplete |
+
+### Notes
+
+- Use one fresh target per payload variant: the injector deletes the per-PID log before
+  injecting, and a same-named module loaded from a different path is refused.
+- Relative `--dll` paths resolve against the injector's working directory, not the
+  target's; quote paths that contain spaces.
+- Running from an RDP-mapped share (`\\tsclient\...`) is supported: the module path is
+  verified against the UNC path, while the evidence log still lands in the target
+  session's local `%TEMP%`.
 
 ## Exit codes
 
