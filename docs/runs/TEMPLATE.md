@@ -23,7 +23,7 @@ with empty or missing fields does not validate the technique.
 | Payload binary (full path, size, SHA-256) | |
 | Injector binary (full path, size, SHA-256) | |
 | Target source last modified | |
-| Payload/source relationship to `techniques/01-dll-injection/code` | |
+| Payload/source relationship to `techniques/pe-injection/dll-injection/code` | |
 
 ## Procedure
 

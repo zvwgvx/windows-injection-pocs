@@ -36,8 +36,8 @@ add_subdirectory(targets/multithreaded-target)
 add_subdirectory(tools/dll-host)
 add_subdirectory(tools/dll-load-demo)
 add_subdirectory(samples/marker-dll)
-add_subdirectory(techniques/01-dll-injection)
-add_subdirectory(techniques/02-process-memory)
+add_subdirectory(techniques/pe-injection/dll-injection)
+add_subdirectory(tools/process-memory)
 
 target_link_libraries(multithreaded-target PRIVATE Threads::Threads)
 
