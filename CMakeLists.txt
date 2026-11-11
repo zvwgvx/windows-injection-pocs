@@ -10,6 +10,11 @@ if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
     message(FATAL_ERROR "This project requires Windows x64.")
 endif()
 
+if(MINGW)
+    # Keep cross-compiled binaries self-contained on a plain Windows x64 host.
+    add_link_options(-static -static-libgcc -static-libstdc++)
+endif()
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -31,6 +36,7 @@ add_subdirectory(targets/multithreaded-target)
 add_subdirectory(tools/dll-host)
 add_subdirectory(tools/dll-load-demo)
 add_subdirectory(samples/marker-dll)
+add_subdirectory(techniques/01-dll-injection)
 add_subdirectory(techniques/02-process-memory)
 
 target_link_libraries(multithreaded-target PRIVATE Threads::Threads)
@@ -46,3 +52,28 @@ add_test(NAME multithreaded-target-smoke COMMAND multithreaded-target --duration
 add_test(NAME memory-layout-smoke COMMAND memory-layout)
 add_test(NAME dll-loading-smoke COMMAND dll-load-demo $<TARGET_FILE:marker-dll>)
 add_test(NAME dll-host-smoke COMMAND dll-host $<TARGET_FILE:marker-dll> --hold-ms 50)
+
+# Shared staging directory for the technique 01 run bundle: the independent
+# target, the injector, the payload and the self-test. The files are generated,
+# not sources, and are ignored by the repository's binary rules.
+set(POC_STAGE_DIR "${CMAKE_SOURCE_DIR}/tools/bin")
+file(MAKE_DIRECTORY "${POC_STAGE_DIR}")
+add_custom_target(stage-poc01 ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:basic-target>"
+            "${POC_STAGE_DIR}/$<TARGET_FILE_NAME:basic-target>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:poc01-injector>"
+            "${POC_STAGE_DIR}/$<TARGET_FILE_NAME:poc01-injector>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:poc01-payload>"
+            "${POC_STAGE_DIR}/$<TARGET_FILE_NAME:poc01-payload>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:poc01-payload-heartbeat>"
+            "${POC_STAGE_DIR}/$<TARGET_FILE_NAME:poc01-payload-heartbeat>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:poc01-selftest>"
+            "${POC_STAGE_DIR}/$<TARGET_FILE_NAME:poc01-selftest>"
+    DEPENDS basic-target poc01-injector poc01-payload poc01-payload-heartbeat poc01-selftest
+    COMMENT "Staging the technique 01 run bundle in tools/bin"
+    VERBATIM)
