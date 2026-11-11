@@ -1,0 +1,9 @@
+id: "19"
+name: "Process Herpaderping"
+status: planned
+tags:
+  payload: [pe]
+  mapping: [modified-file-backed-image]
+  execution: [process-creation]
+  target: [new-process]
+proof: null

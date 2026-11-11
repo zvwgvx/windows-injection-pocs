@@ -1,0 +1,9 @@
+id: "04"
+name: "Reflective DLL Injection"
+status: planned
+tags:
+  payload: [pe, dll]
+  mapping: [reflective-loader]
+  execution: [varies]
+  target: [existing-process]
+proof: null

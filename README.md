@@ -1,85 +1,79 @@
 # Windows Injection PoCs
 
-**Windows x64 process-injection research in C++20.** Independent experiments with source code, documented mechanisms and reproducible evidence where a technique has been implemented.
+**A Windows x64 C++20 research collection of process-injection and process-image execution techniques.** Each PoC has a stable ID, independent documentation, multi-label metadata, and verifiable runtime evidence when implemented.
 
-**Platform:** Windows x64 · **Language:** C++20 · **Build:** CMake · **Validation:** Local Windows runs, no CI
+**Platform:** Windows x64 · **Build:** CMake · **Status:** 1 implemented / 21 catalogued · **CI:** None
 
-[Verified PoC](#verified-poc) · [Technique catalogue](#technique-catalogue) · [Build](#build-and-test) · [Targets and tools](#targets-and-tools) · [Evidence policy](#evidence-policy)
+[PoC Catalogue](#poc-catalogue) · [Verified PoC](#verified-poc-01) · [Build](#build--test) · [Metadata](#metadata-and-tags) · [Research Standards](#research-standards)
 
----
+## PoC Catalogue
 
-## Verified PoC
+A flat index: **one PoC per directory**, with tags describing the payload, mapping/loading method, execution trigger and target type. These axes are not mutually exclusive.
 
-### Classic DLL Injection — `poc01`
+| ID | PoC / Technique | Tags | Status |
+| :--: | --- | --- | --- |
+| 01 | [Classic DLL Injection](pocs/01-classic-dll-injection/README.md) | `pe` · `dll` · `windows-loader` · `remote-thread` | **Implemented** · [Proof](docs/runs/2026-11-11-technique-01.md) |
+| 02 | [PE Image Injection](pocs/02-pe-image-injection/README.md) | `pe` · `pe-image` · `varies` | Planned |
+| 03 | [Manual Mapping](pocs/03-manual-mapping/README.md) | `pe` · `dll` · `manual-mapping` · `varies` | Planned |
+| 04 | [Reflective DLL Injection](pocs/04-reflective-dll-injection/README.md) | `pe` · `dll` · `reflective-loader` · `varies` | Planned |
+| 05 | [DLL Hollowing](pocs/05-dll-hollowing/README.md) | `pe` · `dll` · `module-replacement` · `varies` | Planned |
+| 06 | [Module Stomping](pocs/06-module-stomping/README.md) | `shellcode` · `pe` · `module-replacement` · `varies` | Planned |
+| 07 | [Remote Thread Injection](pocs/07-remote-thread/README.md) | `shellcode` · `private-memory` · `remote-thread` | Planned |
+| 08 | [APC Injection](pocs/08-apc-injection/README.md) | `varies` · `apc` | Planned |
+| 09 | [Early Bird APC Injection](pocs/09-early-bird-apc/README.md) | `varies` · `early-bird-apc` | Planned |
+| 10 | [Thread Execution Hijacking](pocs/10-thread-hijacking/README.md) | `varies` · `thread-hijacking` | Planned |
+| 11 | [Section Mapping Injection](pocs/11-section-mapping/README.md) | `shellcode` · `pe` · `section-mapping` · `varies` | Planned |
+| 12 | [Threadpool Injection](pocs/12-threadpool-injection/README.md) | `varies` · `threadpool` | Planned |
+| 13 | [AtomBombing](pocs/13-atombombing/README.md) | `shellcode` · `atom-table-assisted` · `varies` | Planned |
+| 14 | [Threadless Injection](pocs/14-threadless-injection/README.md) | `varies` · `threadless` | Planned |
+| 15 | [Process Hollowing](pocs/15-process-hollowing/README.md) | `pe` · `image-replacement` · `process-creation` | Planned |
+| 16 | [Transacted Hollowing](pocs/16-transacted-hollowing/README.md) | `pe` · `transacted-image` · `process-creation` | Planned |
+| 17 | [Process Doppelgänging](pocs/17-process-doppelganging/README.md) | `pe` · `transaction-backed-image` · `process-creation` | Planned |
+| 18 | [Process Ghosting](pocs/18-process-ghosting/README.md) | `pe` · `deleted-file-backed-image` · `process-creation` | Planned |
+| 19 | [Process Herpaderping](pocs/19-process-herpaderping/README.md) | `pe` · `modified-file-backed-image` · `process-creation` | Planned |
+| 20 | [.NET Assembly Injection](pocs/20-dotnet-assembly-injection/README.md) | `managed-assembly` · `clr-loading` · `managed-code` | Planned |
+| 21 | [CLR Hosting](pocs/21-clr-hosting/README.md) | `managed-assembly` · `clr-hosting` · `managed-code` | Planned |
 
-**Implemented and documented.** The existing PoC uses `CreateRemoteThread` + `LoadLibraryW` against an independently running target that has no injector-specific loading interface. Its recorded validation environment is Windows 10 Pro 22H2 (x64).
+*Planned means no validated implementation exists for that entry. Process image creation techniques may not be injection into a previously running process.*
+
+## Verified PoC: 01
+
+### Classic DLL Injection
+
+The recorded experiment uses `CreateRemoteThread` + `LoadLibraryW` against a target with no injector-specific loader. Validation was performed on Windows 10 Pro 22H2 (x64); the historical evidence is retained without modification.
 
 | Resource | Direct link |
 | --- | --- |
-| Documentation and usage | [Classic DLL Injection](techniques/pe-injection/dll-injection/README.md) |
-| Injector source | [`poc01-injector.cpp`](techniques/pe-injection/dll-injection/code/poc01-injector.cpp) |
-| DLL payload | [`poc01-payload.cpp`](techniques/pe-injection/dll-injection/code/poc01-payload.cpp) |
-| Heartbeat payload | [`poc01-payload-heartbeat.cpp`](techniques/pe-injection/dll-injection/code/poc01-payload-heartbeat.cpp) |
-| Local self-test | [`poc01-selftest.cpp`](techniques/pe-injection/dll-injection/code/poc01-selftest.cpp) |
-| Runtime proof | [Windows run record, raw output and hashes](docs/runs/2026-11-11-technique-01.md) |
-| Independent corroboration | [System Informer screenshot](docs/runs/assets/2026-11-11-technique-01-system-informer.png) |
+| PoC documentation | [01 — Classic DLL Injection](pocs/01-classic-dll-injection/README.md) |
+| Metadata | [`poc.yaml`](pocs/01-classic-dll-injection/poc.yaml) |
+| Injector | [`poc01-injector.cpp`](pocs/01-classic-dll-injection/code/poc01-injector.cpp) |
+| DLL payload | [`poc01-payload.cpp`](pocs/01-classic-dll-injection/code/poc01-payload.cpp) |
+| Heartbeat payload | [`poc01-payload-heartbeat.cpp`](pocs/01-classic-dll-injection/code/poc01-payload-heartbeat.cpp) |
+| Self-test | [`poc01-selftest.cpp`](pocs/01-classic-dll-injection/code/poc01-selftest.cpp) |
+| Runtime proof | [Run record, raw output, hashes](docs/runs/2026-11-11-technique-01.md) |
+| Independent evidence | [System Informer screenshot](docs/runs/assets/2026-11-11-technique-01-system-informer.png) |
 
-The documented self-test completed **absent → injected → present → duplicate refused**, and the target remained alive. System Informer corroborated the module base, while the heartbeat variant provided additional payload-side execution evidence. These results apply to the recorded test environment.
+The documented self-test demonstrated DLL absence before execution, module presence afterward, duplicate-injection refusal, and target survival. This evidence is specific to the recorded lab environment.
 
-**Repository status:** 1 implemented injection PoC · 20 planned techniques. Planned entries do not contain working injectors.
+## Metadata and Tags
 
-## Technique catalogue
+Every `pocs/NN-name/` directory contains `README.md` and `poc.yaml`. The latter is machine-readable and assigns **multiple** values when applicable:
 
-Technique names link **directly to their documentation**. The primary group describes the payload format or process-image mechanism; an execution method can span multiple groups.
-
-### Shellcode Injection
-
-| Technique | Status |
+| Field | Meaning |
 | --- | --- |
-| [Remote Thread](techniques/shellcode-injection/remote-thread/README.md) | Planned |
-| [APC Injection](techniques/shellcode-injection/apc-injection/README.md) | Planned |
-| [Early Bird APC](techniques/shellcode-injection/early-bird-apc/README.md) | Planned |
-| [Thread Hijacking](techniques/shellcode-injection/thread-hijacking/README.md) | Planned |
-| [Section Mapping](techniques/shellcode-injection/section-mapping/README.md) | Planned |
-| [Threadpool Injection](techniques/shellcode-injection/threadpool-injection/README.md) | Planned |
-| [AtomBombing](techniques/shellcode-injection/atombombing/README.md) | Planned |
-| [Threadless Injection](techniques/shellcode-injection/threadless-injection/README.md) | Planned |
+| `id` | Stable two-digit PoC identifier |
+| `status` | `planned` or `implemented` |
+| `tags.payload` | Payload format, such as `pe`, `dll`, `shellcode`, or `managed-assembly` |
+| `tags.mapping` | Loading or memory-mapping mechanism |
+| `tags.execution` | Execution trigger or method |
+| `tags.target` | `existing-process` or `new-process` |
+| `proof` | Run-record path for a verified PoC; `null` otherwise |
 
-### PE Injection
+A mechanism such as APC may execute different payload types. Its PoC is not automatically a PE or shellcode implementation until the actual payload is specified and validated. See the [catalogue and metadata guide](pocs/README.md).
 
-| Technique | Status |
-| --- | --- |
-| [Classic DLL Injection](techniques/pe-injection/dll-injection/README.md) | **Implemented** · [Proof](docs/runs/2026-11-11-technique-01.md) |
-| [Reflective DLL Injection](techniques/pe-injection/reflective-dll-injection/README.md) | Planned |
-| [Manual Mapping](techniques/pe-injection/manual-mapping/README.md) | Planned |
-| [PE Image Injection](techniques/pe-injection/pe-image-injection/README.md) | Planned |
-| [DLL Hollowing](techniques/pe-injection/dll-hollowing/README.md) | Planned |
-| [Module Stomping](techniques/pe-injection/module-stomping/README.md) | Planned |
+## Build & Test
 
-### Process Image Manipulation
-
-| Technique | Status |
-| --- | --- |
-| [Process Hollowing](techniques/process-image-manipulation/process-hollowing/README.md) | Planned |
-| [Transacted Hollowing](techniques/process-image-manipulation/transacted-hollowing/README.md) | Planned |
-| [Process Doppelgänging](techniques/process-image-manipulation/process-doppelganging/README.md) | Planned |
-| [Process Ghosting](techniques/process-image-manipulation/process-ghosting/README.md) | Planned |
-| [Process Herpaderping](techniques/process-image-manipulation/process-herpaderping/README.md) | Planned |
-
-This group includes process-creation and image-replacement techniques that are not necessarily remote injection into an existing process.
-
-### Managed Code Injection
-
-| Technique | Status |
-| --- | --- |
-| [.NET Assembly Injection](techniques/managed-code-injection/dotnet-assembly-injection/README.md) | Planned |
-| [CLR Hosting](techniques/managed-code-injection/clr-hosting/README.md) | Planned |
-
-[Full technique index](techniques/README.md)
-
-## Build and test
-
-**Requirements:** Windows x64, CMake 3.20+, Visual Studio C++ build tools.
+**Requirements:** Windows x64, CMake 3.20+, MSVC C++ build tools.
 
 ```powershell
 cmake -S . -B build -A x64
@@ -87,33 +81,21 @@ cmake --build build --config Release
 ctest --test-dir build -C Release --output-on-failure
 ```
 
-The build stages the `poc01` target, injector, two DLL payloads and self-test under `tools/bin/`. See [bundle contents](tools/bin/README.md) and the [usage guide](techniques/pe-injection/dll-injection/README.md#usage).
+The build stages the existing `poc01` binaries under `tools/bin/`. See [bundle contents](tools/bin/README.md) and [usage](pocs/01-classic-dll-injection/README.md#usage). The repository has no GitHub Actions CI. A directory restructure alone is not a new Windows runtime validation.
 
-There is no GitHub Actions CI. A documentation or directory change is not a new runtime validation.
-
-## Targets and tools
+## Targets and Tools
 
 | Component | Purpose |
 | --- | --- |
-| [Basic Target](targets/basic-target/main.cpp) | Independent heartbeat process used for Technique 01 |
-| [Multithreaded Target](targets/multithreaded-target/main.cpp) | Independent process with multiple worker threads |
-| [Process Observer](tools/process-observer/README.md) | Read-only process, thread, module and memory metadata |
-| [PE Inspector](tools/pe-inspect/README.md) | Read-only PE headers, sections and imports |
-| [Process Memory](tools/process-memory/README.md) | Memory fundamentals and region queries; **not injection** |
-| [DLL Loading Demo](tools/dll-load-demo/README.md) | Normal in-process DLL loading; **not injection** |
-| [DLL Host](tools/dll-host/README.md) | Explicit sample DLL loader |
-| [Marker DLL](samples/marker-dll/marker.cpp) | Sample exported functions |
+| [Basic Target](targets/basic-target/main.cpp) | Independent single-threaded target |
+| [Multithreaded Target](targets/multithreaded-target/main.cpp) | Independent multi-worker target |
+| [Process Observer](tools/process-observer/README.md) | Read-only module, thread and memory metadata |
+| [Process Memory](tools/process-memory/README.md) | Memory fundamentals and region queries; not an injection technique |
+| [PE Inspector](tools/pe-inspect/README.md) | PE header, section and import inspection |
+| [DLL Loading Demo](tools/dll-load-demo/README.md) | In-process loading baseline; not remote injection |
 
-## Evidence policy
+## Research Standards
 
-- Targets must not contain prearranged payload-loading mechanisms for the technique being tested.
-- Record the actual mechanism, negative controls, outcomes and technical limitations.
-- Distinguish compilation, module presence and confirmed payload execution.
-- Report incomplete verification as incomplete; do not label a simulation as an injection PoC.
-- Preserve historical run records, hashes and screenshots without rewriting past results.
+The target must not contain a prearranged injector-specific loading interface. Source, direct observations, negative controls, test conditions and limitations must be distinguished. Only a reproducible runtime record can justify `implemented` status.
 
-[Experiment protocol](docs/experiment-protocol.md) · [Run records](docs/runs/README.md) · [Windows build notes](docs/build-validation.md)
-
----
-
-[MIT License](LICENSE)
+[Experiment protocol](docs/experiment-protocol.md) · [Run records](docs/runs/README.md) · [Windows build validation](docs/build-validation.md) · [MIT License](LICENSE)

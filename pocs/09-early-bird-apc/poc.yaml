@@ -1,0 +1,9 @@
+id: "09"
+name: "Early Bird APC Injection"
+status: planned
+tags:
+  payload: [varies]
+  mapping: [varies]
+  execution: [early-bird-apc]
+  target: [new-process]
+proof: null

@@ -1,0 +1,9 @@
+id: "01"
+name: "Classic DLL Injection"
+status: implemented
+tags:
+  payload: [pe, dll]
+  mapping: [windows-loader]
+  execution: [remote-thread]
+  target: [existing-process]
+proof: ../../docs/runs/2026-11-11-technique-01.md

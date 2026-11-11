@@ -1,0 +1,9 @@
+id: "11"
+name: "Section Mapping Injection"
+status: planned
+tags:
+  payload: [shellcode, pe]
+  mapping: [section-mapping]
+  execution: [varies]
+  target: [existing-process]
+proof: null

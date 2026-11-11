@@ -1,0 +1,9 @@
+id: "14"
+name: "Threadless Injection"
+status: planned
+tags:
+  payload: [varies]
+  mapping: [varies]
+  execution: [threadless]
+  target: [existing-process]
+proof: null

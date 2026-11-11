@@ -1,0 +1,9 @@
+id: "16"
+name: "Transacted Hollowing"
+status: planned
+tags:
+  payload: [pe]
+  mapping: [transacted-image]
+  execution: [process-creation]
+  target: [new-process]
+proof: null

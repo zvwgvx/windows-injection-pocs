@@ -1,0 +1,9 @@
+id: "15"
+name: "Process Hollowing"
+status: planned
+tags:
+  payload: [pe]
+  mapping: [image-replacement]
+  execution: [process-creation]
+  target: [new-process]
+proof: null

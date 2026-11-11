@@ -1,0 +1,9 @@
+id: "06"
+name: "Module Stomping"
+status: planned
+tags:
+  payload: [shellcode, pe]
+  mapping: [module-replacement]
+  execution: [varies]
+  target: [existing-process]
+proof: null

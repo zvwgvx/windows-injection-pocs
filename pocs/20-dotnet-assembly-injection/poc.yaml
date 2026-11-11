@@ -1,0 +1,9 @@
+id: "20"
+name: ".NET Assembly Injection"
+status: planned
+tags:
+  payload: [managed-assembly]
+  mapping: [clr-loading]
+  execution: [managed-code]
+  target: [existing-process]
+proof: null

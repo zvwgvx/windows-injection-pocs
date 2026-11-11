@@ -1,0 +1,9 @@
+id: "18"
+name: "Process Ghosting"
+status: planned
+tags:
+  payload: [pe]
+  mapping: [deleted-file-backed-image]
+  execution: [process-creation]
+  target: [new-process]
+proof: null

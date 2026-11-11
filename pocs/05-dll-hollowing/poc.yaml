@@ -1,0 +1,9 @@
+id: "05"
+name: "DLL Hollowing"
+status: planned
+tags:
+  payload: [pe, dll]
+  mapping: [module-replacement]
+  execution: [varies]
+  target: [existing-process]
+proof: null

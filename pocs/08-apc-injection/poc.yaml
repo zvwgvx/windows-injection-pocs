@@ -1,0 +1,9 @@
+id: "08"
+name: "APC Injection"
+status: planned
+tags:
+  payload: [varies]
+  mapping: [varies]
+  execution: [apc]
+  target: [existing-process]
+proof: null

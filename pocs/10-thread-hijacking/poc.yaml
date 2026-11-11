@@ -1,0 +1,9 @@
+id: "10"
+name: "Thread Execution Hijacking"
+status: planned
+tags:
+  payload: [varies]
+  mapping: [varies]
+  execution: [thread-hijacking]
+  target: [existing-process]
+proof: null

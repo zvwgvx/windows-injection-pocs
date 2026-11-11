@@ -1,0 +1,9 @@
+id: "13"
+name: "AtomBombing"
+status: planned
+tags:
+  payload: [shellcode]
+  mapping: [atom-table-assisted]
+  execution: [varies]
+  target: [existing-process]
+proof: null

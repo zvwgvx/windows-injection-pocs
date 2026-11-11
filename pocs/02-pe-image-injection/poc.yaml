@@ -1,0 +1,9 @@
+id: "02"
+name: "PE Image Injection"
+status: planned
+tags:
+  payload: [pe]
+  mapping: [pe-image]
+  execution: [varies]
+  target: [existing-process]
+proof: null

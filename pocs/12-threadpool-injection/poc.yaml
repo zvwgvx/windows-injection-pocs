@@ -1,0 +1,9 @@
+id: "12"
+name: "Threadpool Injection"
+status: planned
+tags:
+  payload: [varies]
+  mapping: [varies]
+  execution: [threadpool]
+  target: [existing-process]
+proof: null

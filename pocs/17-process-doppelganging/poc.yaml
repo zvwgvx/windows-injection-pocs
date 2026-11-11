@@ -1,0 +1,9 @@
+id: "17"
+name: "Process Doppelgänging"
+status: planned
+tags:
+  payload: [pe]
+  mapping: [transaction-backed-image]
+  execution: [process-creation]
+  target: [new-process]
+proof: null

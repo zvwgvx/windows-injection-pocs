@@ -1,0 +1,9 @@
+id: "07"
+name: "Remote Thread Injection"
+status: planned
+tags:
+  payload: [shellcode]
+  mapping: [private-memory]
+  execution: [remote-thread]
+  target: [existing-process]
+proof: null

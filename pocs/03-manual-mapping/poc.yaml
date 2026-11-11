@@ -1,0 +1,9 @@
+id: "03"
+name: "Manual Mapping"
+status: planned
+tags:
+  payload: [pe, dll]
+  mapping: [manual-mapping]
+  execution: [varies]
+  target: [existing-process]
+proof: null

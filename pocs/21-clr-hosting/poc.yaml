@@ -1,0 +1,9 @@
+id: "21"
+name: "CLR Hosting"
+status: planned
+tags:
+  payload: [managed-assembly]
+  mapping: [clr-hosting]
+  execution: [managed-code]
+  target: [existing-process]
+proof: null
